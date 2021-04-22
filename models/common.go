@@ -16,3 +16,9 @@ type PageListResult struct {
 	TotalCount int32       `json:"totalCount"` // 总记录数
 	List       interface{} `json:"list"`       // 响应信息
 }
+
+type Oracle struct {
+	AveScore int
+	Times    int
+	Address  string
+}
