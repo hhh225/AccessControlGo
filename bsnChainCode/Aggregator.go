@@ -1,6 +1,7 @@
 package bsnChainCode
 
 import (
+	"awesomeProject/utils"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/peer"
 )
@@ -91,6 +92,10 @@ func ReportScore(respondOracles []string, dataHashes []string) {
 			DuplicateOracles[dataHashes[i]] = []string{respondOracles[i]}
 		}
 	}
+	/*
+		找出正确的结果
+		返回该结果的所有预言机
+	*/
 	for i := 0; i < len(dataHashes); i++ {
 		if Aggrement[dataHashes[i]] >= nMatches {
 			correctHash = dataHashes[i]
@@ -100,13 +105,24 @@ func ReportScore(respondOracles []string, dataHashes []string) {
 			break
 		}
 	}
+	/*
+		计算这次所有有返回结果的预言机的信誉值平均分
+	*/
 	for i := 0; i < len(dataHashes); i++ {
 		for j := 0; j < len(TrueOracles); j++ {
 			if respondOracles[i] == TrueOracles[j] {
 				points = append(points, 100)
+				tempOracle := utils.Oracles[respondOracles[i]]
+				c := tempOracle.Times
+				tempOracle.Times++
+				tempOracle.AveScore = (tempOracle.AveScore*c + 100) / (c + 1)
 				break
 			} else {
 				points = append(points, 0)
+				tempOracle := utils.Oracles[respondOracles[i]]
+				c := tempOracle.Times
+				tempOracle.Times++
+				tempOracle.AveScore = (tempOracle.AveScore * c) / (c + 1)
 			}
 		}
 	}

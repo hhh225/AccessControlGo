@@ -22,3 +22,7 @@ type Oracle struct {
 	Times    int
 	Address  string
 }
+
+func (t *Oracle) SetAveScore(score int) {
+	t.AveScore = score
+}
