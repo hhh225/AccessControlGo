@@ -77,6 +77,14 @@ func DelUser(addrUser string) peer.Response {
 	return shim.Error("此用户不存在")
 }
 
+func toChaincodeArgs2(args ...string) [][]byte {
+	bargs := make([][]byte, len(args))
+	for i, arg := range args {
+		bargs[i] = []byte(arg)
+	}
+	return bargs
+}
+
 func RequestUserToAccessDevicex(stub shim.ChaincodeStubInterface, addrUser string, addrDevice string, nOracle string) peer.Response {
 	i := 0
 	for i = 0; i < len(Devices); i++ {
@@ -105,14 +113,6 @@ func RequestUserToAccessDevicex(stub shim.ChaincodeStubInterface, addrUser strin
 		//返回预言机地址
 		return shim.Success(response.Payload)
 	}
-}
-
-func toChaincodeArgs2(args ...string) [][]byte {
-	bargs := make([][]byte, len(args))
-	for i, arg := range args {
-		bargs[i] = []byte(arg)
-	}
-	return bargs
 }
 
 type BsnChainCode struct {
