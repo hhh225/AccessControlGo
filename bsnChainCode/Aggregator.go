@@ -9,16 +9,6 @@ var AggregatorOwner string
 
 var reputationAddr string
 
-var nResponse int
-
-var nRequestOracles int
-
-var respondingOracles []string = make([]string, 0)
-
-var hashes []string = make([]string, 0)
-
-var user string
-
 var OraclesToDevices map[string][]string = make(map[string][]string)
 var OracleList []string = make([]string, 0)
 
@@ -37,39 +27,41 @@ func AddOracle(oracleAddr string, devices []string) peer.Response {
 	return shim.Success([]byte("成功添加预言机"))
 }
 
-//给预言机发送请求
-func SendDataRequest(stub shim.ChaincodeStubInterface, userAddr string, iotAddr string, nOracles int) {
+//给预言机发送请求，并接收结果返回
+func SendDataRequest(userAddr string, iotAddr string, nOracles int) string {
+	//var nResponse int
+
+	var nRequestOracles int
+
+	var respondingOracles []string = make([]string, 0)
+
+	var hashes []string = make([]string, 0)
+
+	//var user string
 	nRequestOracles = nOracles
-	user = userAddr
+	//user = userAddr
 	counter := 0
+	var resultOracle string = ""
 	for i := 0; i < len(OracleList); i++ { //对于每个预言机
 		devicesListTemp := OraclesToDevices[OracleList[i]]
-		for j := 0; j < len(devicesListTemp); j++ {
-			if iotAddr == devicesListTemp[j] {
+		for j := 0; j < len(devicesListTemp); j++ { //对于这个预言机所能访问的所有物联网设备
+			if iotAddr == devicesListTemp[j] { //如果有某个物联网设备是我们所要的物联网设备
 				counter++
-				//给oracle合约发送请求
+				//给oracle合约发送请求，接收结果
+				oracleRespondingData := Query(iotAddr)
 
+				respondingOracles = append(respondingOracles, OracleList[i])
+				hashes = append(hashes, oracleRespondingData)
 				if counter == nRequestOracles {
-					break
+					resultOracle = ReportScore(respondingOracles, hashes, nRequestOracles)
+					//nResponse = 0
+
+					goto End
 				}
 			}
 
 		}
 	}
-}
-
-//被预言机合约调用
-func OracleResponse(oracleAddr string, oracleresponseData string) {
-	nResponse++
-	respondingOracles = append(respondingOracles, oracleAddr)
-	hashes = append(hashes, oracleresponseData)
-
-	if nResponse == nRequestOracles {
-		//调用
-		ReportScore(respondingOracles, hashes, nRequestOracles)
-		nResponse = 0
-		respondingOracles = []string{}
-		hashes = []string{}
-	}
-
+End:
+	return resultOracle
 }

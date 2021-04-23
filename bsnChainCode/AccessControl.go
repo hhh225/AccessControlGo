@@ -3,6 +3,7 @@ package bsnChainCode
 import (
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/peer"
+	"strconv"
 )
 
 var Count = 0
@@ -106,8 +107,9 @@ func RequestUserToAccessDevicex(stub shim.ChaincodeStubInterface, addrUser strin
 		return shim.Error("用户不能访问该设备")
 	} else {
 		//调用aggregator
-		response := stub.InvokeChaincode("", toChaincodeArgs2(addrUser, addrDevice, nOracle), "")
+		nOracleInt, _ := strconv.ParseInt(nOracle, 10, 0)
+		SendDataRequest(addrUser, addrDevice, int(nOracleInt))
 		//返回预言机地址
-		return shim.Success(response.Payload)
+		return shim.Success([]byte("预言机地址"))
 	}
 }
